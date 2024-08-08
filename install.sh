@@ -272,7 +272,6 @@ echo "$servers_json" | jq -c '.[]' | while IFS= read -r server; do
         sleep 2
         address=$(openstack server show $id |grep -oP '\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b')
         if [[ -n $address ]]; then
-            echo $value
             echo "$name ansible_host=$address ansible_ssh_private_key_file=${sshkey}.pem" >> "$dev_file"
         else
             echo $(openstack server show $id)
