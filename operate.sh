@@ -63,10 +63,10 @@ while true; do
         for server_id in $servers_with_tag; do
             openstack server delete "$server_id"
             if [ $? -eq 0 ]; then
-                echo " $(date +%T) Server $server_id deleted"
+                echo " $(date +%T) Server $server_id ($(openstack server show $server_id -f json | jq -r '.name')) deleted"
                 changes_made=true
             else   
-                echo "$(date +%T) Failed to delete server $server_id"
+                echo "$(date +%T) Failed to delete server $server_id ($(openstack server show $server_id -f json | jq -r '.name')) "
                 openstack server show "$server_id"
                 openstack server list --tags "${tag}dev" -f csv
                 exit 1

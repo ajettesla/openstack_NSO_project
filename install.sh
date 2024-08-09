@@ -4,7 +4,12 @@ openrc_file=$1
 tag=$2
 sshkey=$3
 
-nofn=3
+if [ -z "$4" ]; then
+    nofn=3
+else 
+    nofn=$4
+fi
+
 
 # Check if the OpenRC file exists
 if [ ! -f "$openrc_file" ]; then
@@ -92,7 +97,8 @@ fi
 
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 22 --protocol tcp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 80 --protocol tcp --ingress external_security_group 1>/dev/null
-#openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 1611 --protocol tcp --ingress external_security_group 1>/dev/null
+openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 9090 --protocol tcp --ingress external_security_group 1>/dev/null
+openstack security group rule create --remote-ip 10.1.0.0/16 --protocol any --ingress external_security_group 2>&1 > /dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 161 --protocol udp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --protocol icmp --ingress external_security_group 1>/dev/null
 
@@ -128,7 +134,6 @@ openstack router add subnet router_1 public_subnet 1>/dev/null
 echo " $(date +%T ) subnet are added to router's"
 
 
-
 floating_ip_bastion=$(openstack floating ip create --tag ${tag}bastion_ip ext-net -f json | jq -r .name) 
 
 if [ $? -eq 0 ]; then
@@ -143,6 +148,7 @@ floating_ip_haproxy=$(openstack floating ip create --tag ${tag}haproxy_ip ext-ne
 
 if [ $? -eq 0 ]; then
     echo " $(date +%T ) Floating IP for haproxy is create $floating_ip_haproxy"
+    sed -i "s/^floatingIp=.*/floatingIp=$floating_ip_haproxy/" dcollect.sh
 else
     echo " $(date +%T ) Fail to create haproxy floating IP"
     exit 1
@@ -297,6 +303,8 @@ done
 
 # Create inventory file
 {
+  echo "[local]"
+  echo "localhost ansible_connection=local"
   echo "[dev]"
   cat "$dev_file"
   echo "[proxy]"
@@ -338,9 +346,19 @@ cp "$inventory_file" NSO_final_project/environments/prod
 mkdir -p NSO_final_project/group_vars
 
 cat <<EOF > NSO_final_project/group_vars/all.yml
+
 floatingIp:
   bastion: $floating_ip_bastion
   haproxy: $floating_ip_haproxy
+
+prometheus:
+    version: 2.54.0-rc.1
+    install_dir: "/opt/prometheus"
+    data_dir: "/var/lib/prometheus"
+    config_dir: "/etc/prometheus"
+    prometheus_binary_url: "https://github.com/prometheus/prometheus/releases/download/v2.54.0-rc.1/prometheus-2.54.0-rc.1.linux-amd64.tar.gz"
+    node_exporter_binary_url: "https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz"
+
 EOF
 
 chmod 600 NSO_final_project/${sshkey}.pem > /dev/null 2>&1
