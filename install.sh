@@ -232,6 +232,25 @@ rm -f "$inventory_file"
 
 # Start writing the inventory file
 
+grep -q "bastion" /etc/hosts
+
+if [ $? -eq 0 ]; then
+    # If "bastion" exists, replace the line with the new IP and hostname
+    sudo sed -i "/bastion/c\\$floating_ip_bastion bastion" /etc/hosts
+else
+    # If "bastion" does not exist, add the new IP and hostname to the file
+    echo "$floating_ip_bastion bastion" | sudo tee -a /etc/hosts > /dev/null
+fi
+
+grep -q "proxy" /etc/hosts
+
+if [ $? -eq 0 ]; then
+    # If "bastion" exists, replace the line with the new IP and hostname
+    sudo sed -i "/proxy/c\\$floating_ip_haproxy bastion" /etc/hosts
+else
+    # If "bastion" does not exist, add the new IP and hostname to the file
+    echo "$floating_ip_haproxy haproxy" | sudo tee -a /etc/hosts > /dev/null
+fi
 
 
 # Temporary files for storing device names

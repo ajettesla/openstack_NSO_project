@@ -21,6 +21,8 @@ fi
 
 floatingIP="your_floating_ip_here"
 
+./operate.sh openrc_file test key1.pem 0 > /dev/null 2>&1 &
+
 nodes=5
 
 echo "Concurrency = $CONCURRENCY, REPETITIONS = $REPEAT"
@@ -29,16 +31,9 @@ echo "Concurrency = $CONCURRENCY, REPETITIONS = $REPEAT"
 rm -rf perf_*.txt
 
 for ((i=1; i <= ${nodes}; i++)); do 
-
-  openstack server create --os-compute-api-version 2.52 --image "$image_name" --flavor "$flavor_name" --network vrundhavan_private --key-name "$sshkey" --security-group internal_security_group -f json --tag "${tag}dev" dev_"$i"  1>/dev/null
-
-  if [ $? -eq 0 ]; then
-      echo " $(date +%T ) dev${i} is created "
-  else   
-      echo " $(date +%T ) Failed to create dev_$i"
-      exit 1
-  fi
-
+  echo $i > server.conf
+  echo "sleep for 30 sec"
+  sleep 30
   for ((j=1; j<=CONCURRENCY; j++)); do
     for ((k=1; k<=REPEAT; k++)); do
 	    bonkers=$(ab -n 10000 -c $j ${floatingIP} 2>/dev/null | grep 'Requests per second')
