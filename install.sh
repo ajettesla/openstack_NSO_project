@@ -392,4 +392,9 @@ cp openrc_file  NSO_final_project/roles/keepalived/files > /dev/null 2>&1
 
 cd  NSO_final_project
 
+ssh-keygen -f "/root/.ssh/known_hosts" -R "bastion" > /dev/null 2>&1
+
+ssh-keygen -f "/root/.ssh/known_hosts" -R "haproxy" > /dev/null 2>&1
+
+
 ansible-playbook app.yml
