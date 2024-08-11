@@ -98,6 +98,7 @@ fi
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 22 --protocol tcp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 80 --protocol tcp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 9090 --protocol tcp --ingress external_security_group 1>/dev/null
+openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 3000 --protocol tcp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 10.1.0.0/16 --protocol any --ingress external_security_group 2>&1 > /dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --dst-port 161 --protocol udp --ingress external_security_group 1>/dev/null
 openstack security group rule create --remote-ip 0.0.0.0/0 --protocol icmp --ingress external_security_group 1>/dev/null

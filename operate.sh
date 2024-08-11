@@ -150,6 +150,8 @@ while true; do
 
         # Create inventory file
         {
+            echo "[local]"
+            echo "localhost ansible_connection=local"
             echo "[dev]"
             cat "$dev_file"
             echo "[proxy]"
